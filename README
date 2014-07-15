@@ -1,0 +1,18 @@
+This Python script access the WaniKani API and generates writing excercise papers for each level.
+
+The stroke order images are being harvested from: http://lingweb.eva.mpg.de/kanji/
+
+In order to use this program you need a valid WaniKani API Key.
+You can check your API Key on www.wanikani.com under the settings menu.
+
+So far, this script has been designed to work with Linux (tested on Ubuntu 14.04).
+
+You need the following programs to run it:
+
+* Python (2.7.*)
+* pdflatex
+* CJK LaTeX package
+
+You can install LaTeX on Linux by: sudo apt-get install texlive-full
+
+
