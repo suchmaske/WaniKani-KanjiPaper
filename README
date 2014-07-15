@@ -14,5 +14,7 @@ You need the following programs to run it:
 * CJK LaTeX package
 
 You can install LaTeX on Linux by: sudo apt-get install texlive-full
+Windows users can install MikTeX from: http://miktex.org/
 
+License: CC-BY-SA
 
