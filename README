@@ -1,6 +1,6 @@
 This Python script access the WaniKani API and generates writing excercise papers for each level.
 
-The stroke order images are being harvested from: http://lingweb.eva.mpg.de/kanji/
+The stroke order images have been colored and numbered by cayennes' kanji-colorize (https://github.com/cayennes/kanji-colorize). The original images are based on KanjiVG (https://github.com/KanjiVG/kanjivg) by Ulrich Apel and licensed under CC-3.0-BY-SA
 
 In order to use this program you need a valid WaniKani API Key.
 You can check your API Key on www.wanikani.com under the settings menu.
