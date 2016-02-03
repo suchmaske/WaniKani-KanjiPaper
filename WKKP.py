@@ -307,6 +307,6 @@ def create_vocab_lession(lvl):
 
 
 
-for i in range(1, 51):
+for i in range(1, 61):
     create_kanji_lesson(i)
     create_vocab_lession(i)
