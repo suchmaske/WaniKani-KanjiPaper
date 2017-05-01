@@ -24,3 +24,4 @@ pip install -r requirements.txt
 
 ## Download PDFs
 
+Go here: http://suchmaske.github.io/WaniKani-KanjiPaper/#/

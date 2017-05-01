@@ -19,7 +19,7 @@ VOCAB_OUTPUT_DIR = os.path.join(CWD, "out", "vocabulary")
 
 
 # Add you WaniKani API-KEY here
-WK_API_KEY = "1d0ff5ba8886755b0215b681223d2b3c"
+WK_API_KEY = ""
 wanikani = WaniKani(WK_API_KEY)
 
 KANJI_TYPE = "Kanji"
