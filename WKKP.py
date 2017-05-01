@@ -1,86 +1,52 @@
 # -*- coding: utf-8 -*-
-
 from PIL import Image
-import json
+from crabigator.wanikani import WaniKani
+import codecs
 import os
 import platform
-import sys
-import urllib, urllib2
 
-reload(sys).setdefaultencoding("utf-8")
 
 CWD = os.getcwd()
 
-# KanjiStrokes contains all PNG-files from: https://github.com/downloads/cayennes/kanji-colorize/kanji-colorize-spectrum-png.zip
-STROKES_DIR = os.path.join(CWD, "KanjiStrokes")
-OUTPUT_DIR = os.path.join(CWD, "KanjiImages")
+# kanji contains all PNG-files from: https://github.com/downloads/cayennes/kanji-colorize/kanji-colorize-spectrum-png.zip
+STROKES_DIR = os.path.join(CWD, "assets", "kanji_strokes")
+KANJI_BOXES_DIR = os.path.join(CWD, "assets", "kanji_boxes")
+KANJI_ROW_IMAGE = os.path.join(CWD, "assets", "latex", "kanji-row.png")
 
-LATEX_DIR = os.path.join(CWD, "KanjiPaper")
-VOCAB_LATEX_DIR = os.path.join(CWD, "VocabPaper")
+KANJI_OUTPUT_DIR = os.path.join(CWD, "out", "kanji")
+VOCAB_OUTPUT_DIR = os.path.join(CWD, "out", "vocabulary")
 
-KANJI_ROW_IMAGE = os.path.join(CWD, "kanji-row.png")
+
 
 # Add you WaniKani API-KEY here
-WK_KEY = ""
-WK_API = "https://www.wanikani.com/api/user/" + WK_KEY
-WK_KANJI = WK_API + "/kanji/"
-WK_VOCAB = WK_API + "/vocabulary/"
+WK_API_KEY = "1d0ff5ba8886755b0215b681223d2b3c"
+wanikani = WaniKani(WK_API_KEY)
 
 KANJI_TYPE = "Kanji"
 VOCAB_TYPE = "Vocabulary"
 
+# Number of kanji per page
 KANJI_PP = 5
 
-LATEX_HEAD = """
-\documentclass[a4paper,11pt]{article}
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage{lmodern}
+latex_head_path = os.path.join(CWD, "assets/latex/header.tex")
+with open(latex_head_path, "r") as latex_header:
+    LATEX_HEAD = latex_header.read()
 
-\usepackage{hyperref}
-\usepackage[left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm,includeheadfoot]{geometry}
-\usepackage{graphicx}
-\usepackage{fancyhdr}
+latex_foot_path = os.path.join(CWD, "assets/latex/footer.tex")
+with open(latex_foot_path, "r") as latex_footer:
+    LATEX_FOOT = latex_footer.read()
 
-\usepackage{zxjatype}
-\usepackage[ipa]{zxjafont}
-
-\\title{}
-\\author{}
-
-\\fancyhf{}
-\\fancyhead[C]{}
-% \\fancyfoot[L]{The stroke order diagrams were taken from: \url{http://lingweb.eva.mpg.de/kanji/}. Copyright owner of the diagrams is Ulrich Apel.}
-\pagestyle{fancy}
-
-\\fancyfoot[L]{\\tiny{This writing excercise was generated using WaniKani\_KanjiPaper (\url{https://github.com/suchmaske/WaniKani-KanjiPaper}). It relies on the stroke order diagrams produced by cayennes' kanji-colorize (\url{https://github.com/cayennes/kanji-colorize}) using KanjiVG (\url{https://github.com/KanjiVG/kanjivg} -- Creative Commons 3.0 (SA) by Ulrich Apel)}}
-
-\\begin{document}
-
-
-\maketitle
-
-
-"""
-
-LATEX_FOOT = """
-
-
-
-\end{document}
-"""
-
-if not os.path.exists(OUTPUT_DIR):
-    os.makedirs(OUTPUT_DIR)
+if not os.path.exists(KANJI_BOXES_DIR):
+    os.makedirs(KANJI_BOXES_DIR)
     
-if not os.path.exists(LATEX_DIR):
-    os.makedirs(LATEX_DIR)
+if not os.path.exists(KANJI_OUTPUT_DIR):
+    os.makedirs(KANJI_OUTPUT_DIR)
 
 def create_kanji(kanji):
 
     # Get the unicode of that kanji
     kanji_code = repr(kanji)[4:8]
-    kanji_filename = kanji_code + ".jpg"
+    kanji_filename = kanji + ".jpg"
     
     # Open the images
     kanji_img_path = os.path.join(STROKES_DIR, kanji + ".png")
@@ -96,7 +62,7 @@ def create_kanji(kanji):
     bands = [b.resize((inc*2, inc*2), Image.LINEAR) for b in bands]
     kanji_img = Image.merge("RGBA", bands)
 
-    blank_box_path = os.path.join(CWD, "Kanji327.png")
+    blank_box_path = os.path.join(CWD, "assets", "latex", "kanji327.png")
     blank_box = Image.open(blank_box_path)
         
     num_boxes = 12
@@ -115,7 +81,7 @@ def create_kanji(kanji):
         
     new_img.paste(kanji_img, (0,0))
     
-    outpath = os.path.join(OUTPUT_DIR, kanji_filename)
+    outpath = os.path.join(KANJI_BOXES_DIR, kanji_filename)
         
     new_img.save(outpath)
     
@@ -123,7 +89,7 @@ def create_kanji(kanji):
 
 def create_blank_box(num_boxes):
 
-    blank_box_path = os.path.join(CWD, "Kanji327.png")
+    blank_box_path = os.path.join(CWD, "kanji327.png")
     blank_box = Image.open(blank_box_path)
 
     box_width, box_height = blank_box.size
@@ -154,15 +120,10 @@ def create_title(type, lvl):
 
 
 def create_kanji_lesson(lvl):
-    
-    # Build the API URL for this level
-    kanji_lvl = WK_KANJI + str(lvl)
-    print kanji_lvl
-    
-    # Read the JSON data and get requested information
-    response = urllib2.urlopen(kanji_lvl)
-    kanji_json = json.load(response)["requested_information"]
-    
+
+    # Get list of kanji items for the level
+    kanji_list = wanikani.get_kanji(levels=[lvl])
+
     title = create_title(KANJI_TYPE, lvl)
     latex_string = title
     
@@ -170,30 +131,31 @@ def create_kanji_lesson(lvl):
     firstpage = True
     
     # Iterate over the list of kanji
-    for kanji_info in kanji_json:
+    for kanji_info in kanji_list:
         
         counter += 1
         
-        kanji = kanji_info["character"]
+        kanji = kanji_info.character
         kanji_description = "\\noindent " + str(kanji) + " -- "
-        
+
+
         onyomi = ""
-        if "onyomi" in kanji_info:
-            onyomi = kanji_info["onyomi"]
+        if kanji_info.onyomi:
+            onyomi = ", ".join(kanji_info.onyomi)
             kanji_description +=  "On'yomi: " + str(onyomi) + " -- "
             
         kunyomi = ""
-        if "kunyomi" in kanji_info:
-            kunyomi = kanji_info["kunyomi"]
+        if kanji_info.kunyomi:
+            kunyomi = ", ".join(kanji_info.kunyomi)
             kanji_description += " Kun'yomi: " + str(kunyomi) + " -- "
             
-        meaning = kanji_info["meaning"]
+        meaning = ", ".join(kanji_info.meaning)
         kanji_description += meaning + " \\newline\n"
         
-        img_path = create_kanji(unicode(kanji))
-        includepath = "\includegraphics[height=0.12\\textheight]{" + img_path.replace("\\", "/") + "}\n"
+        img_path = create_kanji(kanji)
+        includepath = r"\includegraphics[height=0.12\textheight]{" + img_path.replace("\\", "/") + r"}"
         
-        latex_kanji= kanji_description + includepath + "\\vspace{10pt}\n\n"
+        latex_kanji= kanji_description + includepath + "\n\n\\vspace{10pt}\n\n"
         
         latex_string += latex_kanji
         
@@ -207,7 +169,7 @@ def create_kanji_lesson(lvl):
     latex_string += LATEX_FOOT
 
     latex_dirname = "WK-Kanji-" + str(lvl)
-    latex_dirpath = os.path.join(LATEX_DIR, latex_dirname)
+    latex_dirpath = os.path.join(KANJI_OUTPUT_DIR, latex_dirname)
 
     latex_filename = latex_dirname + ".tex"
     latex_filepath = os.path.join(latex_dirpath, latex_filename)
@@ -215,11 +177,10 @@ def create_kanji_lesson(lvl):
     if not os.path.exists(latex_dirpath):
           os.makedirs(latex_dirpath)
 
-    latex_file = open(latex_filepath, "wb")
-    
-    latex_file.write(latex_string)
-    
-    latex_file.close()
+    with codecs.open(latex_filepath, "w", "utf8") as latex_file:
+        print()
+        latex_file.write(latex_string)
+        latex_file.close()
 
     os.chdir(latex_dirpath)
 
@@ -231,13 +192,8 @@ def create_kanji_lesson(lvl):
 
 def create_vocab_lession(lvl):
 
-    print "AAAAAA " + str(lvl)
-    vocab_lvl = WK_VOCAB + str(lvl)
-    print vocab_lvl
 
-
-    response = urllib2.urlopen(vocab_lvl)
-    vocab_json = json.load(response)["requested_information"]
+    vocab_list = wanikani.get_vocabulary(levels=[lvl])
 
     title = create_title(VOCAB_TYPE, lvl)
     latex_string = title
@@ -245,26 +201,26 @@ def create_vocab_lession(lvl):
     counter = 0
     firstpage = True
 
-    for vocab in vocab_json:
+    for vocab in vocab_list:
 
         counter += 1
 
         vocab_description = ""
 
         kana = ""
-        if "kana" in vocab:
-            kana += "Kana: " + str(vocab["kana"]) + " -- "
+        if vocab.kana:
+            kana += "Kana: " + ", ".join(vocab.kana) + " -- "
             vocab_description += kana
 
         meaning = ""
-        if "meaning" in vocab:
-            meaning += "Meaning: " + str(vocab["meaning"])
+        if vocab.meaning:
+            meaning += "Meaning: " + ", ".join(vocab.meaning)
             vocab_description += meaning + " \\newline\n"
 
 
-        includepath = "\includegraphics[height=0.12\\textheight]{" + KANJI_ROW_IMAGE.replace("\\", "/") + "}\n"
+        includepath = r"\includegraphics[height=0.12\textheight]{" + KANJI_ROW_IMAGE.replace("\\", "/") + r"}"
 
-        latex_vocab = vocab_description + includepath + "\\vspace{10pt}\n\n"
+        latex_vocab = vocab_description + includepath + "\n\n\\vspace{10pt}\n\n"
 
         latex_string += latex_vocab
 
@@ -278,7 +234,7 @@ def create_vocab_lession(lvl):
     latex_string += LATEX_FOOT
 
     latex_dirname = "WK-Vocab-" + str(lvl)
-    latex_dirpath = os.path.join(VOCAB_LATEX_DIR, latex_dirname)
+    latex_dirpath = os.path.join(VOCAB_OUTPUT_DIR, latex_dirname)
 
     latex_filename = latex_dirname + ".tex"
     latex_filepath = os.path.join(latex_dirpath, latex_filename)
@@ -286,11 +242,9 @@ def create_vocab_lession(lvl):
     if not os.path.exists(latex_dirpath):
       os.makedirs(latex_dirpath)
 
-    latex_file = open(latex_filepath, "wb")
-
-    latex_file.write(latex_string)
-
-    latex_file.close()
+    with codecs.open(latex_filepath, "w", "utf-8") as latex_file:
+        latex_file.write(latex_string)
+        latex_file.close()
 
     os.chdir(latex_dirpath)
 
@@ -301,12 +255,7 @@ def create_vocab_lession(lvl):
     os.chdir(CWD)
 
 
-
-# create_blank_box(12)
-
-
-
-
 for i in range(1, 61):
     create_kanji_lesson(i)
     create_vocab_lession(i)
+

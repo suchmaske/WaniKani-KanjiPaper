@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="language" content="english, en, japanese, jp">
+    <meta name="keywords" content="kanji, japanese vocabulary, writing practice, wanikani">
+    <meta name="description" content="Practice Sheets for WaniKani Kanji and Vocabulary">
+    <meta name="author" content="Oliver Pohl">
+    <meta name="robots" content="index,follow">
+    <meta name="audience" content="all">
+    <meta name="page-topic" content="service">
+    <meta name="revisit-after" CONTENT="7 days">
+
+    <title>WaniKani Kanji Paper</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.4.1/css/bulma.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+
+<div id="wkkp">
+
+    <div class="container">
+        <navigation></navigation>
+    </div>
+
+    <div class="hero is-primary">
+        <div class="hero-body">
+            <div class="container">
+                <div class="columns is-vcentered">
+                    <div class="column">
+                        <p class="title">WaniKani KanjiPaper</p>
+                        <p class="subtitle">Practice Sheets for WaniKani Kanji and Vocabulary</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-foot">
+            <div class="container">
+                <nav class="tabs is-boxed">
+                    <ul>
+                        <router-link tag="li" to="/" exact>
+                            <a>Home</a>
+                        </router-link>
+                        <router-link tag="li" to="/kanji" exact>
+                            <a>Kanji</a>
+                        </router-link>
+                        <router-link tag="li" to="/vocabulary" exact>
+                            <a>Vocabulary</a>
+                        </router-link>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+     <section class="section">
+        <div class="container">
+            <router-view></router-view>
+        </div>
+    </section>
+
+    <foot></foot>
+
+</div>
+
+<script src="dist/js/wkkp.bundle.js"></script>
+
+</body>
+</html>
