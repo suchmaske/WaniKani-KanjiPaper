@@ -1,4 +1,4 @@
-var webpack = require("webpack");
+const webpack = require("webpack");
 
 module.exports = {
 
@@ -27,7 +27,6 @@ module.exports = {
             vue: 'vue/dist/vue.js'
         }
     }
-
 
 };
 
