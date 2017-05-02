@@ -2,7 +2,7 @@
 
 ## Description
 
-Generate practice riting sheets for WaniKani kanji and vocabulary as PDFs. 
+Generate practice writing sheets for WaniKani kanji and vocabulary as PDFs. 
 
 ## Requirements
 
